@@ -6,6 +6,7 @@ from typing import List
 from threading import Thread
 from collections import namedtuple
 from src.config.configuration import Configuration
+from src.constant import TRAINING_PIPELINE_NAME
 from src.entity.artifact_entity import DataIngestionArtifact
 from src.entity.config_entity import DataIngestionConfig
 from src.component.data_ingestion import DataIngestion
@@ -16,11 +17,11 @@ from src.exception import CustomException
 EXPERIMENT_DIR_NAME = 'experiment'
 EXPERIMENT_FILE_NAME = 'experiment.csv'
 
-Experiment = namedtuple('Experiment' , ['id', 'initial_timestamp', 'artifact_timestamp', 'status', 'start_time', 'stop_time', 'execution_time', 'msg', 'file_path', 'accuracy', 'model_accepted'], defaults=(None,)*11)
+Experiment = namedtuple('Experiment' , ['id', 'initial_timestamp', 'artifact_timestamp', 'status', 'start_time', 'stop_time', 'execution_time', 'msg', 'file_path', 'accuracy', 'model_accepted'])
 
-class Pipeline():
+class Pipeline(Thread):
     # class variables
-    experiment = Experiment
+    experiment = Experiment(*([None] * 11)) # initializing all values to None
     experiment_file_path = None
 
     def __init__(self, config: Configuration) -> None:
@@ -29,7 +30,7 @@ class Pipeline():
             # creating a experiment csv file path ./artifact/experiment/experiment.csv
             Pipeline.experiment_file_path = os.path.join(config.train_pipeline_config.artifact_dir, EXPERIMENT_DIR_NAME, EXPERIMENT_FILE_NAME)
             self.config = config
-            #super().__init__(daemon=False, name='pipeline')
+            super().__init__(daemon=False, name='pipeline')
         except Exception as e:
             raise CustomException(e, sys) from e
 
@@ -44,7 +45,7 @@ class Pipeline():
                 experiment_dict = {key: [value] for key, value in experiment_dict.items()} # key would colname and value would be values
                 experiment_dict.update({
                     'created_time_stamp': [datetime.now()],
-                    'experiment_file': [os.path.basepath(Pipeline.experiment.file_path)]}
+                    'experiment_file': [os.path.basename(Pipeline.experiment.file_path)]}
                 )
                 df = pd.DataFrame(experiment_dict)
                 os.makedirs(os.path.dirname(Pipeline.experiment.file_path), exist_ok=True)
@@ -53,7 +54,7 @@ class Pipeline():
                 else:
                     df.to_csv(Pipeline.experiment.file_path, index=False, header=True, mode='w')
             else:
-                logging(f'first experiment')
+                logging.info(f'first experiment')
 
         except Exception as e:
             raise CustomException(e, sys) from e
@@ -109,4 +110,4 @@ class Pipeline():
             raise CustomException(e, sys) from e
 
 x = Configuration(os.path.join('config', 'config.yaml'))
-a = Pipeline(x).run()
+Pipeline(x).start()

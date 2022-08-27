@@ -128,3 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 src.egg-info/
+avila_classifer/
+avila_logging/

@@ -55,8 +55,52 @@ class DataIngestion:
 
             with ZipFile(file_path) as zip_file:
                 zip_file.extractall(raw_data_dir)
-            logging(f'Extracted zip file into {raw_data_dir}')
+            logging.info(f'Extracted zip file into {raw_data_dir}')
         
+        except Exception as e:
+            raise CustomException(e, sys) from e
+
+    def train_test_dataset(self) -> DataIngestionArtifact:
+        """Train
+        Function creates the train and test dataframe and stores them as csv files and return the data ingestion artifact object
+        """
+        try:
+            raw_data_dir = self.data_ingestion_config.raw_data_dir
+            raw_data_avila_dir = os.path.join(raw_data_dir, 'avila')
+            train_file_name, test_file_name = [i for i in os.listdir(raw_data_avila_dir) if i.startswith('avila-t')]
+            train_file_path = os.path.join(raw_data_avila_dir, train_file_name)
+            test_file_path = os.path.join(raw_data_avila_dir, test_file_name)
+            column_list = ['intercolumnar_distance', 'upper_margin', 'lower_margin', 'exploitation', 'row_number', 'modular_ratio', 'interlinear_spacing', 'weight', 'peak_number', 'ratio', 'class']
+
+            train_df = pd.read_csv(train_file_path, names=column_list)
+            test_df = pd.read_csv(test_file_path, names=column_list)
+
+            train_file_name = os.path.basename(train_file_path.replace('.txt', '.csv'))
+            test_file_name = os.path.basename(test_file_path.replace('.txt', '.csv'))
+
+            train_ingested_file_path = os.path.join(self.data_ingestion_config.ingested_train_data_dir, train_file_name)
+            test_ingested_file_path = os.path.join(self.data_ingestion_config.ingested_test_data_dir, test_file_name)
+            print(train_ingested_file_path, test_ingested_file_path)
+
+            if len(train_df) > 0:
+                os.makedirs(self.data_ingestion_config.ingested_train_data_dir, exist_ok=True)
+                logging.info(f'train dataset ingested into train ingestion directory {self.data_ingestion_config.ingested_train_data_dir}')
+                train_df.to_csv(train_ingested_file_path, index=False)
+
+            if len(test_df) > 0:
+                os.makedirs(self.data_ingestion_config.ingested_test_data_dir, exist_ok=True)
+                logging.info(f'test dataset ingested into train ingestion directory {self.data_ingestion_config.ingested_test_data_dir}')
+                test_df.to_csv(test_ingested_file_path, index=False)
+
+            data_ingestion_artifact = DataIngestionArtifact(
+                train_file_path = train_ingested_file_path,
+                test_file_path = test_ingested_file_path, 
+                data_ingested = True,
+                msg = 'Data ingestion completed')
+            
+            logging.info(f'Data ingestion artifact {data_ingestion_artifact}')
+            return data_ingestion_artifact
+
         except Exception as e:
             raise CustomException(e, sys) from e
 
@@ -65,5 +109,6 @@ class DataIngestion:
         try:
             avila_zip_file = self.download_data()
             self.extract_zip_file(avila_zip_file)
+            return self.train_test_dataset()
         except Exception as e:
             raise CustomException(e, sys) from e

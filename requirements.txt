@@ -6,4 +6,6 @@ numpy
 pyYAML
 matplotlib
 evidently
+notebook
+pandas-profiling
 -e .

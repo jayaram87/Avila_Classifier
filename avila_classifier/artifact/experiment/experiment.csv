@@ -1,0 +1,2 @@
+id,initial_timestamp,artifact_timestamp,status,start_time,stop_time,execution_time,msg,file_path,accuracy,model_accepted,created_time_stamp,experiment_file
+db4a7fd0-3eea-421f-9446-226c8a7e08a6,2022-08-26-20-02-54,2022-08-26-20-02-54,True,2022-08-26 20:02:54.084750,,,Pipeline has started,D:\ineuron\Internships\AvilaClassifier\avila_classifier\artifact\experiment\experiment.csv,,,2022-08-26 20:02:54.084750,experiment.csv
