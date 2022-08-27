@@ -6,10 +6,9 @@ from typing import List
 from threading import Thread
 from collections import namedtuple
 from src.config.configuration import Configuration
-from src.constant import TRAINING_PIPELINE_NAME
-from src.entity.artifact_entity import DataIngestionArtifact
-from src.entity.config_entity import DataIngestionConfig
+from src.entity.artifact_entity import DataIngestionArtifact, DataValidationArtifact
 from src.component.data_ingestion import DataIngestion
+from src.component.data_validation import DataValidation
 from src.logger import logging
 from src.exception import CustomException
 
@@ -69,6 +68,15 @@ class Pipeline(Thread):
         except Exception as e:
             raise CustomException(e, sys) from e
 
+    def data_validation(self, data_ing_artifact: DataIngestionArtifact) -> DataValidationArtifact:
+        """
+        Validates the ingested train and test data for null values, column names and dtypes and returns a DataValidation artifact
+        """
+        try:
+            data_validation = DataValidation(self.config.get_data_validation_config(), data_ing_artifact)
+            return data_validation.complete_validation()
+        except Exception as e:
+            raise CustomException(e, sys) from e
 
     def pipeline_run(self):
         try:
@@ -99,6 +107,7 @@ class Pipeline(Thread):
 
             # data ingestion module
             data_ingestion_artifact = self.data_ingestion()
+            data_validation_artifact = self.data_validation(data_ingestion_artifact)
 
         except Exception as e:
             raise CustomException(e, sys) from e

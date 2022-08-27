@@ -2,7 +2,7 @@ import os, sys
 from datetime import datetime
 from src.constant import *
 from src.entity.artifact_entity import DataIngestionArtifact
-from src.entity.config_entity import DataIngestionConfig, TrainPipelineConfig
+from src.entity.config_entity import DataIngestionConfig, DataValidationConfig, TrainPipelineConfig
 from src.utils.util import read_yaml_file
 from src.exception import CustomException
 from src.logger import logging
@@ -57,3 +57,23 @@ class Configuration:
             logging.error(f'{str(e)}')
             raise CustomException(e, sys) from e
 
+    def get_data_validation_config(self) -> DataValidationConfig:
+        """
+        Returns the DataValidation obeject with all the key/values pairs
+        """
+        try:
+            artifact_dir = self.train_pipeline_config.artifact_dir
+            data_validation_artifact_dir = os.path.join(artifact_dir, DATA_VALIDATION_ARTIFACT_DIR, self.timestamp) # directory for each initial_timestamp
+            data_validation_config = self.config[DATA_VALIDATION_CONFIG]
+            schema_file_path = os.path.join(ROOT_DIR, data_validation_config[DATA_VALIDATION_SCHEMA_DIR], data_validation_config[DATA_VALIDATION_SCHEMA_FILE_NAME])
+            report_file_path = os.path.join(data_validation_artifact_dir, data_validation_config[DATA_VALIDATION_REPORT_FILE_NEME])
+            report_page_file_path = os.path.join(data_validation_artifact_dir, data_validation_config[DATA_VALIDATION_REPORT_PAGE_FILE_NAME])
+
+            data_validation_config = DataValidationConfig(
+                schema_file_path = schema_file_path, 
+                report_file_path = report_file_path,
+                report_page_file_path = report_page_file_path
+            )
+            return data_validation_config
+        except Exception as e:
+            raise CustomException(e, sys) from e

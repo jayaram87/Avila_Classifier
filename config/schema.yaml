@@ -1,0 +1,26 @@
+columns:
+ intercolumnar_distance: float64
+ upper_margin: float64
+ lower_margin: float64
+ exploitation: float64
+ row_number: float64
+ modular_ratio: float64
+ interlinear_spacing: float64
+ weight: float64
+ peak_number: float64
+ ratio: float64
+ class: object
+
+float_columns:
+  - intercolumnar_distance
+  - upper_margin
+  - lower_margin
+  - exploitation
+  - row_number
+  - modular_ratio
+  - interlinear_spacing
+  - weight
+  - peak_number
+  - ratio
+
+target_column: class
