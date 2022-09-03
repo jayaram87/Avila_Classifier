@@ -15,3 +15,6 @@ data_validation_config:
   schema_file_name: schema.yaml
   report_file_name: report.json
   report_page_file_name: report.html
+
+data_analysis_config:
+  profiling_page_file_name: train_profile.html

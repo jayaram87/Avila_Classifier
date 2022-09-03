@@ -27,6 +27,11 @@ DATA_VALIDATION_CONFIG = 'data_validation_config'
 DATA_VALIDATION_ARTIFACT_DIR = 'data_validation'
 DATA_VALIDATION_SCHEMA_FILE_NAME = 'schema_file_name'
 DATA_VALIDATION_SCHEMA_DIR = 'schema_dir'
-DATA_VALIDATION_ARTIFACT_DIR = 'data_validation'
 DATA_VALIDATION_REPORT_FILE_NEME = 'report_file_name'
 DATA_VALIDATION_REPORT_PAGE_FILE_NAME = 'report_page_file_name'
+
+#data analysis constants
+DATA_ANALYSIS_CONFIG = 'data_analysis_config'
+DATA_ANALYSIS_ARTIFACT_DIR = 'data_analysis'
+DATA_ANALYSIS_PROFILE_FILE_NEME = 'profiling_file_name'
+DATA_ANALYSIS_PROFILE_PAGE_FILE_NAME = 'profiling_page_file_name'

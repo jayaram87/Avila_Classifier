@@ -5,4 +5,6 @@ DataIngestionConfig = namedtuple('DataIngestionConfig', ['data_download_url', 'r
 
 DataValidationConfig = namedtuple('DataValidationConfig', ['schema_file_path', 'report_file_path', 'report_page_file_path'])
 
+DataAnalysisConfig = namedtuple('DataAnalysisConfig', ['profiling_page_file_path'])
+
 TrainPipelineConfig = namedtuple('TrainPipelineConfig', ['artifact_dir'])

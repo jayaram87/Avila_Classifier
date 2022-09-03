@@ -9,8 +9,11 @@ from src.config.configuration import Configuration
 from src.entity.artifact_entity import DataIngestionArtifact, DataValidationArtifact
 from src.component.data_ingestion import DataIngestion
 from src.component.data_validation import DataValidation
+from src.component.data_analysis import DataAnalysis
 from src.logger import logging
 from src.exception import CustomException
+import matplotlib
+matplotlib.use('TkAgg')
 
 # used to store the experiment/project run details in a csv
 EXPERIMENT_DIR_NAME = 'experiment'
@@ -78,6 +81,17 @@ class Pipeline(Thread):
         except Exception as e:
             raise CustomException(e, sys) from e
 
+    def data_analysis(self, data_ing_artifact: DataIngestion) -> None:
+        """
+        Pandas profiling reports in html and json format for train and test dataset
+        """
+        try:
+            analysis = DataAnalysis(self.config.get_data_analysis_config(), data_ing_artifact)
+            analysis.complete_analysis()
+        except Exception as e:
+            raise CustomException(e, sys) from e
+
+
     def pipeline_run(self):
         try:
             print(Pipeline.experiment.status)
@@ -108,6 +122,7 @@ class Pipeline(Thread):
             # data ingestion module
             data_ingestion_artifact = self.data_ingestion()
             data_validation_artifact = self.data_validation(data_ingestion_artifact)
+            self.data_analysis(data_ingestion_artifact)
 
         except Exception as e:
             raise CustomException(e, sys) from e
