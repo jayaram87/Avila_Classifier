@@ -2,7 +2,7 @@ import os, sys
 from datetime import datetime
 from src.constant import *
 from src.entity.artifact_entity import DataIngestionArtifact
-from src.entity.config_entity import DataIngestionConfig, DataValidationConfig, DataAnalysisConfig, TrainPipelineConfig
+from src.entity.config_entity import DataIngestionConfig, DataValidationConfig, DataAnalysisConfig, DataTransformationConfig, TrainPipelineConfig
 from src.utils.util import read_yaml_file
 from src.exception import CustomException
 from src.logger import logging
@@ -92,5 +92,25 @@ class Configuration:
                 profiling_page_file_path = profiling_page_file_path
             )
             return data_analysis_config
+        except Exception as e:
+            raise CustomException(e, sys) from e
+
+    def get_data_transformation_config(self) -> DataTransformationConfig:
+        try:
+            artifact_dir = self.train_pipeline_config.artifact_dir
+            data_transformation_artifact_dir = os.path.join(artifact_dir, DATA_TRANSFORMATION_ARTIFACT_DIR, self.timestamp)
+            data_transform_config_info = self.config[DATA_TRANSFORMATION_CONFIG]
+
+            transformed_train_dir = os.path.join(data_transformation_artifact_dir, data_transform_config_info[DATA_TRANSFORMATION_DIR_NAME], data_transform_config_info[DATA_TRANSFORMATION_TRAIN_DIR_NAME])
+            transformed_test_dir = os.path.join(data_transformation_artifact_dir, data_transform_config_info[DATA_TRANSFORMATION_DIR_NAME], data_transform_config_info[DATA_TRANSFORMATION_TEST_DIR_NAME])
+
+            data_transform_config = DataTransformationConfig(
+                transformed_train_dir = transformed_train_dir,
+                transformed_test_dir = transformed_test_dir
+            )
+
+            logging.info(f'Data transformation config {data_transform_config}')
+            return data_transform_config
+
         except Exception as e:
             raise CustomException(e, sys) from e

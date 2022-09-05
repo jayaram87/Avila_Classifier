@@ -18,3 +18,9 @@ data_validation_config:
 
 data_analysis_config:
   profiling_page_file_name: train_profile.html
+
+data_transformation_config:
+  transformed_dir: transformed_data
+  transformed_train_dir: train
+  transformed_test_dir: test
+  

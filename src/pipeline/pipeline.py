@@ -6,10 +6,11 @@ from typing import List
 from threading import Thread
 from collections import namedtuple
 from src.config.configuration import Configuration
-from src.entity.artifact_entity import DataIngestionArtifact, DataValidationArtifact
+from src.entity.artifact_entity import DataIngestionArtifact, DataValidationArtifact, DataTransformationArtifact
 from src.component.data_ingestion import DataIngestion
 from src.component.data_validation import DataValidation
 from src.component.data_analysis import DataAnalysis
+from src.component.data_transformation import DataTransformation
 from src.logger import logging
 from src.exception import CustomException
 import matplotlib
@@ -91,6 +92,19 @@ class Pipeline(Thread):
         except Exception as e:
             raise CustomException(e, sys) from e
 
+    def data_transformation(self, data_ing_artifact: DataIngestion, data_val_artifact: DataValidationArtifact) -> DataTransformationArtifact:
+        try:
+            """
+            Train data is transformed using pca, pac with smote sampling, non_pac smote sampling
+            Test data is transformed using pca
+            Class labels are transfomred using label encoder for xgboost library
+            All the files are saved as numpy arrays
+            """
+            data_transform = DataTransformation(self.config.get_data_transformation_config(), data_ing_artifact, data_val_artifact)
+            return data_transform.data_transformed()
+        except Exception as e:
+            raise CustomException(e, sys) from e
+
 
     def pipeline_run(self):
         try:
@@ -122,7 +136,8 @@ class Pipeline(Thread):
             # data ingestion module
             data_ingestion_artifact = self.data_ingestion()
             data_validation_artifact = self.data_validation(data_ingestion_artifact)
-            self.data_analysis(data_ingestion_artifact)
+            #self.data_analysis(data_ingestion_artifact)
+            data_transformation_artifact = self.data_transformation(data_ingestion_artifact, data_validation_artifact)
 
         except Exception as e:
             raise CustomException(e, sys) from e

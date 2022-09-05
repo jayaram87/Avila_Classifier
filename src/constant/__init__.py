@@ -35,3 +35,10 @@ DATA_ANALYSIS_CONFIG = 'data_analysis_config'
 DATA_ANALYSIS_ARTIFACT_DIR = 'data_analysis'
 DATA_ANALYSIS_PROFILE_FILE_NEME = 'profiling_file_name'
 DATA_ANALYSIS_PROFILE_PAGE_FILE_NAME = 'profiling_page_file_name'
+
+#data transformation constants
+DATA_TRANSFORMATION_ARTIFACT_DIR = 'data_transformation'
+DATA_TRANSFORMATION_CONFIG = 'data_transformation_config'
+DATA_TRANSFORMATION_DIR_NAME = 'transformed_dir'
+DATA_TRANSFORMATION_TRAIN_DIR_NAME = 'transformed_train_dir'
+DATA_TRANSFORMATION_TEST_DIR_NAME = 'transformed_test_dir'

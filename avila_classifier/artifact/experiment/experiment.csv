@@ -1,3 +1,2 @@
 id,initial_timestamp,artifact_timestamp,status,start_time,stop_time,execution_time,msg,file_path,accuracy,model_accepted,created_time_stamp,experiment_file
-d8257e4a-edc7-4d37-be37-81a6cfd8843d,2022-09-02-21-20-59,2022-09-02-21-20-59,True,2022-09-02 21:21:02.193816,,,Pipeline has started,D:\ineuron\Internships\AvilaClassifier\avila_classifier\artifact\experiment\experiment.csv,,,2022-09-02 21:21:02.193816,experiment.csv
-790a22e6-e124-4530-82d0-b9961764f5f4,2022-09-02-21-23-50,2022-09-02-21-23-50,True,2022-09-02 21:23:52.631149,,,Pipeline has started,D:\ineuron\Internships\AvilaClassifier\avila_classifier\artifact\experiment\experiment.csv,,,2022-09-02 21:23:52.631149,experiment.csv
+ab0afa6c-7b2d-4957-a5b7-b093ef52878d,2022-09-05-17-06-44,2022-09-05-17-06-44,True,2022-09-05 17:06:47.033402,,,Pipeline has started,D:\ineuron\Internships\AvilaClassifier\avila_classifier\artifact\experiment\experiment.csv,,,2022-09-05 17:06:47.033402,experiment.csv
