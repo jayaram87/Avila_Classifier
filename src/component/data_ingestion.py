@@ -80,7 +80,6 @@ class DataIngestion:
 
             train_ingested_file_path = os.path.join(self.data_ingestion_config.ingested_train_data_dir, train_file_name)
             test_ingested_file_path = os.path.join(self.data_ingestion_config.ingested_test_data_dir, test_file_name)
-            print(train_ingested_file_path, test_ingested_file_path)
 
             if len(train_df) > 0:
                 os.makedirs(self.data_ingestion_config.ingested_train_data_dir, exist_ok=True)

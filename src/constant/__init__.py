@@ -42,3 +42,8 @@ DATA_TRANSFORMATION_CONFIG = 'data_transformation_config'
 DATA_TRANSFORMATION_DIR_NAME = 'transformed_dir'
 DATA_TRANSFORMATION_TRAIN_DIR_NAME = 'transformed_train_dir'
 DATA_TRANSFORMATION_TEST_DIR_NAME = 'transformed_test_dir'
+
+#model constants
+MODEL_TRAINE_ARTIFACT_DIR = 'model'
+MODEL_CONFIG = 'model_config'
+BEST_MODEL = 'best_model'

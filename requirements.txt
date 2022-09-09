@@ -9,4 +9,5 @@ evidently
 notebook
 pandas-profiling
 imblearn
+xgboost
 -e .

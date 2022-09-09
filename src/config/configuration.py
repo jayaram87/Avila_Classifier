@@ -2,7 +2,7 @@ import os, sys
 from datetime import datetime
 from src.constant import *
 from src.entity.artifact_entity import DataIngestionArtifact
-from src.entity.config_entity import DataIngestionConfig, DataValidationConfig, DataAnalysisConfig, DataTransformationConfig, TrainPipelineConfig
+from src.entity.config_entity import DataIngestionConfig, DataValidationConfig, DataAnalysisConfig, DataTransformationConfig, ModelConfig, TrainPipelineConfig
 from src.utils.util import read_yaml_file
 from src.exception import CustomException
 from src.logger import logging
@@ -23,7 +23,7 @@ class Configuration:
             train_pipeline_config = self.config[TRAINING_PIPELINE_CONFIG]
             artifact_dir = os.path.join(ROOT_DIR, train_pipeline_config[TRAINING_PIPELINE_NAME], train_pipeline_config[TRAINING_PIPELINE_ARTIFACT_DIR])
             pipeline_config = TrainPipelineConfig(artifact_dir=artifact_dir)
-            logging.info(f'Training pipelien config: {pipeline_config}')
+            #logging.info(f'Training pipelien config: {pipeline_config}')
             return pipeline_config
         except Exception as e:
             raise CustomException(e, sys) from e
@@ -112,5 +112,23 @@ class Configuration:
             logging.info(f'Data transformation config {data_transform_config}')
             return data_transform_config
 
+        except Exception as e:
+            raise CustomException(e, sys) from e
+
+    def get_model_config(self) -> ModelConfig:
+        """
+        Returns the model config object
+        """
+        try:
+            artifact_dir = self.train_pipeline_config.artifact_dir
+            model_artifact_dir = os.path.join(artifact_dir, MODEL_TRAINE_ARTIFACT_DIR, self.timestamp)
+            best_model_path = os.path.join(model_artifact_dir, self.config[MODEL_CONFIG][BEST_MODEL])
+
+            model_config = ModelConfig(
+                model_file_path = best_model_path
+            )
+            #logging.info(f'model config {model_config}')
+            return model_config
+        
         except Exception as e:
             raise CustomException(e, sys) from e

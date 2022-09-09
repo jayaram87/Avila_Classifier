@@ -9,4 +9,6 @@ DataAnalysisConfig = namedtuple('DataAnalysisConfig', ['profiling_page_file_path
 
 DataTransformationConfig = namedtuple('DataTransformationConfig', ['transformed_train_dir', 'transformed_test_dir'])
 
+ModelConfig = namedtuple('ModelConfig', ['model_file_path'])
+
 TrainPipelineConfig = namedtuple('TrainPipelineConfig', ['artifact_dir'])

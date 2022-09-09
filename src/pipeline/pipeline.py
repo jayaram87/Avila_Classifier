@@ -1,20 +1,20 @@
-import os, sys, shutil
+import os, sys
 import uuid
 import pandas as pd
 from datetime import datetime
 from typing import List
-from threading import Thread
+#from threading import Thread
+#from multiprocessing import Process
 from collections import namedtuple
 from src.config.configuration import Configuration
-from src.entity.artifact_entity import DataIngestionArtifact, DataValidationArtifact, DataTransformationArtifact
+from src.entity.artifact_entity import DataIngestionArtifact, DataValidationArtifact, DataTransformationArtifact, ModelArtifact
 from src.component.data_ingestion import DataIngestion
 from src.component.data_validation import DataValidation
 from src.component.data_analysis import DataAnalysis
 from src.component.data_transformation import DataTransformation
+from src.component.model_trainer import Trainer
 from src.logger import logging
 from src.exception import CustomException
-import matplotlib
-matplotlib.use('TkAgg')
 
 # used to store the experiment/project run details in a csv
 EXPERIMENT_DIR_NAME = 'experiment'
@@ -22,7 +22,7 @@ EXPERIMENT_FILE_NAME = 'experiment.csv'
 
 Experiment = namedtuple('Experiment' , ['id', 'initial_timestamp', 'artifact_timestamp', 'status', 'start_time', 'stop_time', 'execution_time', 'msg', 'file_path', 'accuracy', 'model_accepted'])
 
-class Pipeline(Thread):
+class Pipeline:
     # class variables
     experiment = Experiment(*([None] * 11)) # initializing all values to None
     experiment_file_path = None
@@ -33,7 +33,7 @@ class Pipeline(Thread):
             # creating a experiment csv file path ./artifact/experiment/experiment.csv
             Pipeline.experiment_file_path = os.path.join(config.train_pipeline_config.artifact_dir, EXPERIMENT_DIR_NAME, EXPERIMENT_FILE_NAME)
             self.config = config
-            super().__init__(daemon=False, name='pipeline')
+            #super().__init__(daemon=True, name='pipeline')
         except Exception as e:
             raise CustomException(e, sys) from e
 
@@ -105,6 +105,39 @@ class Pipeline(Thread):
         except Exception as e:
             raise CustomException(e, sys) from e
 
+    def best_model(self, data_transform_artifact: DataTransformationArtifact) -> ModelArtifact:
+        """
+        Returns a best model artifact with model, test_score and evaluation metric
+        Model config: return ModelConfig object with best model path
+        """
+        try:
+            classifier = Trainer(self.config.get_model_config(), data_transform_artifact)
+            return classifier.best_classifier()
+
+        except Exception as e:
+            raise CustomException(e, sys) from e
+
+    def save_experiment(self):
+        """
+        Saving the metadata of the pipeline experiment
+        """
+        try:
+            if Pipeline.experiment.id is not None:
+                experiment = Pipeline.experiment
+                experiment_hash = {key: [value] for key, value in experiment._asdict().items()}
+                experiment_hash.update(
+                    {'created_time_stamp' : [datetime.now()],
+                    'experiment_file_name' : [os.path.basename(experiment.file_path)]}
+                )
+                report = pd.DataFrame(experiment_hash)
+                os.makedirs(os.path.dirname(Pipeline.experiment_file_path), exist_ok=True)
+                if os.path.exists(Pipeline.experiment_file_path):
+                    report.to_csv(Pipeline.experiment_file_path, mode='a', header=False, index=False) 
+                else:
+                    report.to_csv(Pipeline.experiment_file_path, mode='w', header=True, index=False) 
+
+        except Exception as e:
+            raise CustomException(e, sys) from e
 
     def pipeline_run(self):
         try:
@@ -116,7 +149,6 @@ class Pipeline(Thread):
 
             logging.info(f'Training pipeline is starting')
             id = str(uuid.uuid4())
-            print(id)
             Pipeline.experiment = Experiment(
                 id = id,
                 initial_timestamp = self.config.timestamp,
@@ -136,8 +168,29 @@ class Pipeline(Thread):
             # data ingestion module
             data_ingestion_artifact = self.data_ingestion()
             data_validation_artifact = self.data_validation(data_ingestion_artifact)
-            #self.data_analysis(data_ingestion_artifact)
+            self.data_analysis(data_ingestion_artifact)
             data_transformation_artifact = self.data_transformation(data_ingestion_artifact, data_validation_artifact)
+            model_artifact = self.best_model(data_transformation_artifact)
+            print(model_artifact)
+
+            logging.info(f'Model training, evaluation completed....')
+            stop_time = datetime.now()
+
+            Pipeline.experiment = Experiment(
+                id = Pipeline.experiment.id,
+                initial_timestamp = self.config.timestamp,
+                artifact_timestamp = self.config.timestamp, 
+                status = False,
+                start_time = Pipeline.experiment.start_time,
+                stop_time = stop_time,
+                execution_time = stop_time - Pipeline.experiment.start_time,
+                msg = 'Training pipeline is completed',
+                file_path = Pipeline.experiment_file_path, 
+                accuracy = model_artifact.score,
+                model_accepted = model_artifact.accepted
+            )
+            logging.info(f'Pipeline experiment {Pipeline.experiment}')
+            self.save_experiment()
 
         except Exception as e:
             raise CustomException(e, sys) from e
@@ -147,6 +200,3 @@ class Pipeline(Thread):
             self.pipeline_run()
         except Exception as e:
             raise CustomException(e, sys) from e
-
-x = Configuration(os.path.join('config', 'config.yaml'))
-Pipeline(x).start()

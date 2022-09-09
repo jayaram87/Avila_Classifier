@@ -23,4 +23,8 @@ data_transformation_config:
   transformed_dir: transformed_data
   transformed_train_dir: train
   transformed_test_dir: test
+
+model_config:
+  model_dir: trained_model
+  best_model: model.pkl
   
