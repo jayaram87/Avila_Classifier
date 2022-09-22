@@ -4,4 +4,4 @@ WORKDIR /app
 RUN pip freeze > requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE $PORT
-CMD gunicorn --workers=1 --bind 0.0.0.0:$PORT app:app
+CMD gunicorn --workers=4 --bind 0.0.0.0:$PORT app:app
