@@ -20,11 +20,11 @@ from src.exception import CustomException
 EXPERIMENT_DIR_NAME = 'experiment'
 EXPERIMENT_FILE_NAME = 'experiment.csv'
 
-Experiment = namedtuple('Experiment' , ['id', 'initial_timestamp', 'artifact_timestamp', 'status', 'start_time', 'stop_time', 'execution_time', 'msg', 'file_path', 'accuracy', 'model_accepted'])
+Experiment = namedtuple('Experiment' , ['id', 'initial_timestamp', 'artifact_timestamp', 'status', 'start_time', 'stop_time', 'execution_time', 'msg', 'file_path', 'model_file_path', 'le_file_path', 'accuracy', 'model_accepted'])
 
 class Pipeline:
     # class variables
-    experiment = Experiment(*([None] * 11)) # initializing all values to None
+    experiment = Experiment(*([None] * 13)) # initializing all values to None
     experiment_file_path = None
 
     def __init__(self, config: Configuration) -> None:
@@ -159,6 +159,8 @@ class Pipeline:
                 execution_time = None,
                 msg = 'Pipeline has started',
                 file_path = Pipeline.experiment_file_path, 
+                model_file_path = None,
+                le_file_path = None,
                 accuracy = None,
                 model_accepted = None
             )
@@ -170,8 +172,7 @@ class Pipeline:
             data_validation_artifact = self.data_validation(data_ingestion_artifact)
             self.data_analysis(data_ingestion_artifact)
             data_transformation_artifact = self.data_transformation(data_ingestion_artifact, data_validation_artifact)
-            model_artifact = self.best_model(data_transformation_artifact)
-            print(model_artifact)
+            model_artifact = self.best_model(data_transformation_artifact) 
 
             logging.info(f'Model training, evaluation completed....')
             stop_time = datetime.now()
@@ -186,9 +187,12 @@ class Pipeline:
                 execution_time = stop_time - Pipeline.experiment.start_time,
                 msg = 'Training pipeline is completed',
                 file_path = Pipeline.experiment_file_path, 
+                model_file_path = model_artifact.best_model,
+                le_file_path = data_transformation_artifact.labelencoder,
                 accuracy = model_artifact.score,
                 model_accepted = model_artifact.accepted
             )
+            print(Pipeline.experiment)
             logging.info(f'Pipeline experiment {Pipeline.experiment}')
             self.save_experiment()
 

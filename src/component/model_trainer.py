@@ -1,3 +1,4 @@
+import json
 import os, sys
 from typing import Dict
 import pandas as pd
@@ -5,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import concurrent
 from src.exception import CustomException
+from src.logger import logging
 from src.entity.artifact_entity import DataTransformationArtifact, ModelArtifact
 from src.entity.config_entity import ModelConfig
 from src.utils.util import save_object
@@ -27,9 +29,9 @@ class Trainer:
         """
         try:
             #logging.info(f'Model training starting......')
-            pca_data_xtrain, pca_data_ytrain = self.load_data(self.data_transform_artifact.pca_sample_train_file_path)
-            pca_data_xtest, pca_data_ytest = self.load_data(self.data_transform_artifact.pca_test_file_path)
-            pca_sample_xtrain, pca_sample_ytrain = self.load_data(self.data_transform_artifact.pca_sample_train_file_path)
+            #pca_data_xtrain, pca_data_ytrain = self.load_data(self.data_transform_artifact.pca_sample_train_file_path)
+            #pca_data_xtest, pca_data_ytest = self.load_data(self.data_transform_artifact.pca_test_file_path)
+            #pca_sample_xtrain, pca_sample_ytrain = self.load_data(self.data_transform_artifact.pca_sample_train_file_path)
             x_train, y_train = self.load_data(self.data_transform_artifact.train_data_file_path)
             x_test, y_test = self.load_data(self.data_transform_artifact.test_data_file_path)
             sample_xtrain, sample_ytrain = self.load_data(self.data_transform_artifact.no_pca_sample_train_file_path)
@@ -56,34 +58,74 @@ class Trainer:
 
                 result = pd.DataFrame([pca_xbg.result(), pca_rf.result(), pca_gb.result(), pca_et.result(), pca_sample_xbg.result(), pca_sample_rf.result(), pca_sample_gb.result(), pca_sample_et.result(), xbg.result(), rf.result(), gb.result(), et.result(), sample_xbg.result(), sample_rf.result(), sample_gb.result(), sample_et.result()])
             """
-            pca_xbg = self.model_training(xgb.XGBClassifier(), pca_data_xtrain, pca_data_xtest, pca_data_ytrain, pca_data_ytest, 'xgboost', True, False)
-            pca_rf = self.model_training(RandomForestClassifier(), pca_data_xtrain, pca_data_xtest, pca_data_ytrain, pca_data_ytest, 'RandomForest', True, False)
-            pca_gb = self.model_training(GradientBoostingClassifier(), pca_data_xtrain, pca_data_xtest, pca_data_ytrain, pca_data_ytest, 'GrandientBoost', True, False)
-            pca_et = self.model_training(ExtraTreesClassifier(), pca_data_xtrain, pca_data_xtest, pca_data_ytrain, pca_data_ytest, 'ExtraTress', True, False)
-            pca_sample_xbg = self.model_training(xgb.XGBClassifier(), pca_sample_xtrain, pca_data_xtest, pca_sample_ytrain, pca_data_ytest, 'xgboost', True, True)
-            pca_sample_rf = self.model_training(RandomForestClassifier(), pca_sample_xtrain, pca_data_xtest, pca_sample_ytrain, pca_data_ytest, 'RandomForest', True, True)
-            pca_sample_gb = self.model_training(GradientBoostingClassifier(), pca_sample_xtrain, pca_data_xtest, pca_sample_ytrain, pca_data_ytest, 'GrandientBoost', True, True)
-            pca_sample_et = self.model_training(ExtraTreesClassifier(), pca_sample_xtrain, pca_data_xtest, pca_sample_ytrain, pca_data_ytest, 'ExtraTress', True, True)
+            # With PCA fbeta scores were bad becoz the raw data was already standardized
+            #pca_xbg = self.model_training(xgb.XGBClassifier(), pca_data_xtrain, pca_data_xtest, pca_data_ytrain, pca_data_ytest, 'xgboost', True, False)
+            #pca_rf = self.model_training(RandomForestClassifier(), pca_data_xtrain, pca_data_xtest, pca_data_ytrain, pca_data_ytest, 'RandomForest', True, False)
+            #pca_gb = self.model_training(GradientBoostingClassifier(), pca_data_xtrain, pca_data_xtest, pca_data_ytrain, pca_data_ytest, 'GrandientBoost', True, False)
+            #pca_et = self.model_training(ExtraTreesClassifier(), pca_data_xtrain, pca_data_xtest, pca_data_ytrain, pca_data_ytest, 'ExtraTress', True, False)
+            #pca_sample_xbg = self.model_training(xgb.XGBClassifier(), pca_sample_xtrain, pca_data_xtest, pca_sample_ytrain, pca_data_ytest, 'xgboost', True, True)
+            #pca_sample_rf = self.model_training(RandomForestClassifier(), pca_sample_xtrain, pca_data_xtest, pca_sample_ytrain, pca_data_ytest, 'RandomForest', True, True)
+            #pca_sample_gb = self.model_training(GradientBoostingClassifier(), pca_sample_xtrain, pca_data_xtest, pca_sample_ytrain, pca_data_ytest, 'GrandientBoost', True, True)
+            #pca_sample_et = self.model_training(ExtraTreesClassifier(), pca_sample_xtrain, pca_data_xtest, pca_sample_ytrain, pca_data_ytest, 'ExtraTress', True, True)
             xbg = self.model_training(xgb.XGBClassifier(), x_train, x_test, y_train, y_test, 'xgboost', False, False)
             rf = self.model_training(RandomForestClassifier(), x_train, x_test, y_train, y_test, 'RandomForest', False, False)
             gb = self.model_training(GradientBoostingClassifier(), x_train, x_test, y_train, y_test, 'GrandientBoost', False, False)
             et = self.model_training(ExtraTreesClassifier(), x_train, x_test, y_train, y_test, 'ExtraTress', False, False)
-            sample_xbg = self.model_training(xgb.XGBClassifier(), sample_xtrain, x_test, y_train, sample_ytrain, 'xgboost', False, True)
-            sample_rf = self.model_training(RandomForestClassifier(), sample_xtrain, x_test, y_train, sample_ytrain, 'RandomForest', False, True)
-            sample_gb = self.model_training(GradientBoostingClassifier(), sample_xtrain, x_test, y_train, sample_ytrain, 'GrandientBoost', False, True)
-            sample_et = self.model_training(ExtraTreesClassifier(), sample_xtrain, x_test, y_train, sample_ytrain, 'ExtraTress', False, True)
+            sample_xbg = self.model_training(xgb.XGBClassifier(), sample_xtrain, x_test, sample_ytrain, y_test, 'xgboost', False, True)
+            sample_rf = self.model_training(RandomForestClassifier(), sample_xtrain, x_test, sample_ytrain, y_test, 'RandomForest', False, True)
+            sample_gb = self.model_training(GradientBoostingClassifier(), sample_xtrain, x_test, sample_ytrain, y_test, 'GrandientBoost', False, True)
+            sample_et = self.model_training(ExtraTreesClassifier(), sample_xtrain, x_test, sample_ytrain, y_test, 'ExtraTress', False, True)
 
-            result = pd.DataFrame([pca_xbg, pca_rf, pca_gb, pca_et, pca_sample_xbg, pca_sample_rf, pca_sample_gb, pca_sample_et.result(), xbg.result(), rf.result(), gb.result(), et.result(), sample_xbg.result(), sample_rf.result(), sample_gb.result(), sample_et.result()])
+            result = pd.DataFrame([xbg, rf, gb, et, sample_xbg, sample_rf, sample_gb, sample_et])
 
-            print(result)
+            best_model = result[result['test_fbeta_score'] == result['test_fbeta_score'].max()]['model'][0]
+            best_params = result[result['test_fbeta_score'] == result['test_fbeta_score'].max()]['model_params'][0]
+            sampling = result[result['test_fbeta_score'] == result['test_fbeta_score'].max()]['sampling'][0]
+
+            
+            if sampling:
+                if best_model == 'xgboost':
+                    final_model = xgb.XGBClassifier(**best_params)
+                    final_model.fit(sample_xtrain, sample_ytrain)
+                elif best_model == 'RandomForest':
+                    final_model = RandomForestClassifier(**best_params)
+                    final_model.fit(sample_xtrain, sample_ytrain)
+                elif best_model == 'GrandientBoost':
+                    final_model = GradientBoostingClassifier(**best_params)
+                    final_model.fit(sample_xtrain, sample_ytrain)
+                elif best_model == 'ExtraTress':
+                    final_model = ExtraTreesClassifier(**best_params)
+                    final_model.fit(sample_xtrain, sample_ytrain)
+            else:
+                if best_model == 'xgboost':
+                    final_model = xgb.XGBClassifier(**best_params)
+                    final_model.fit(x_train, y_train)
+                elif best_model == 'RandomForest':
+                    final_model = RandomForestClassifier(**best_params)
+                    final_model.fit(x_train, y_train)
+                elif best_model == 'GrandientBoost':
+                    final_model = GradientBoostingClassifier(**best_params)
+                    final_model.fit(x_train, y_train)
+                elif best_model == 'ExtraTress':
+                    final_model = ExtraTreesClassifier(**best_params)
+                    final_model.fit(x_train, y_train)
+            
+            save_object(self.model_config.model_file_path, final_model)
+
+            score, metric = self.evaluate(final_model, x_test, y_test)
+
+            data = json.dumps({'test_score': score, 'metric': metric})
+
+            with open(self.model_config.score_path, 'w+') as f:
+                f.write(data)
             
             model_artifact = ModelArtifact(
-                best_model = None, 
-                score = None,
-                metric = None,
+                best_model = self.model_config.model_file_path, 
+                score = self.model_config.score_path,
                 accepted = f'Best model generated'
             )
-            #logging(f'Model training completed {model_artifact}')
+
+            logging.info(f'Model training completed {model_artifact}')
             return model_artifact
 
         except Exception as e:
@@ -98,8 +140,8 @@ class Trainer:
             model_dict = {}
             if model_spec in ['GrandientBoost', 'xgboost']:
                 params = {
-                    'n_estimators': [100, 500, 1000],
-                    'learning_rate': [0.01, 0.1, 1],
+                    'n_estimators': [50, 100],
+                    'learning_rate': [0.01, 0.1],
                     'random_state': [1]
                 }
                 grid = GridSearchCV(classifier, param_grid=params, n_jobs=-1, scoring=scorer)
@@ -113,13 +155,13 @@ class Trainer:
 
             elif model_spec in ['RandomForest', 'ExtraTress']:
                 params = {
-                    'n_estimators': [100, 500, 1000],
-                    'max_features': ['auto', 'sqrt', 'log2'],
+                    'n_estimators': [50, 100],
+                    'max_features': ['auto', 'log2'],
                     'random_state': [1]
                 }
                 grid = GridSearchCV(classifier, param_grid=params, n_jobs=-1, scoring=scorer)
                 grid.fit(x_train, y_train)
-                model_dict['model_spec'] = model_spec
+                model_dict['model'] = model_spec
                 model_dict['model_params'] = grid.best_params_
                 model_dict['pca'] = pca
                 model_dict['sampling'] = sampling
@@ -130,6 +172,19 @@ class Trainer:
         
         except Exception as e:
             raise CustomException(e, sys) from e
+
+    def evaluate(self, model, x_test, y_test):
+        """
+        returns the fbeta score and the metric and stores the confusion matirx as jpg and json
+        """
+        try:
+            metric = 'fbeta_score'
+            score = round(fbeta_score(y_test, model.predict(x_test), beta=1, average='weighted'),2)
+            logging.info(f'model was evaluated with fbeta score on the test data')
+            return score, metric
+        except Exception as e:
+            raise CustomException(e, sys) from e
+
 
     def load_data(self, file_path: str):
         """

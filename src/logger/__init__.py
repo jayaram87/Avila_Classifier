@@ -5,13 +5,10 @@ import pandas as pd
 
 log_dir = 'avila_logging'
 
+os.makedirs(log_dir, exist_ok=True)
+
 current_time_stamp = f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}'
 log_file_name = f'log_{current_time_stamp}.log'
-
-if os.path.exists(log_dir):
-    shutil.rmtree(log_dir)
-
-os.makedirs(log_dir, exist_ok=True)
 
 log_file_path = os.path.join(log_dir, log_file_name)
 

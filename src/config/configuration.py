@@ -123,9 +123,11 @@ class Configuration:
             artifact_dir = self.train_pipeline_config.artifact_dir
             model_artifact_dir = os.path.join(artifact_dir, MODEL_TRAINE_ARTIFACT_DIR, self.timestamp)
             best_model_path = os.path.join(model_artifact_dir, self.config[MODEL_CONFIG][BEST_MODEL])
+            score_path = os.path.join(model_artifact_dir, self.config[MODEL_CONFIG][SCORE])
 
             model_config = ModelConfig(
-                model_file_path = best_model_path
+                model_file_path = best_model_path,
+                score_path = score_path
             )
             #logging.info(f'model config {model_config}')
             return model_config

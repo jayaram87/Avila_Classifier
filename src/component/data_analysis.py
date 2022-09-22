@@ -5,6 +5,7 @@ from src.exception import CustomException
 from src.entity.config_entity import DataAnalysisConfig
 from src.entity.artifact_entity import DataIngestionArtifact
 from pandas_profiling import ProfileReport
+import matplotlib
 
 class DataAnalysis:
     def __init__(self, data_analysis_config: DataAnalysisConfig, data_ingestion_artifact: DataIngestionArtifact):
@@ -16,6 +17,7 @@ class DataAnalysis:
         Creates pandas profiling report for train and test datasets
         """
         try:
+            matplotlib.use('Agg')
             train_df = pd.read_csv(self.data_ingestion_artifact.train_file_path)
             test_df = pd.read_csv(self.data_ingestion_artifact.test_file_path)
 
