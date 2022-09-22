@@ -10,6 +10,7 @@ beautifulsoup4==4.11.1
 bleach==5.0.1
 blessed==1.18.0
 cached-property==1.5.2
+cachetools==5.2.0
 cassandra-driver==3.25.0
 certifi==2022.6.15
 cffi==1.15.1
@@ -35,10 +36,11 @@ fonttools==4.37.1
 geomet==0.2.1.post1
 gitdb==4.0.9
 GitPython==3.1.27
+google-auth==2.11.1
 google-auth-oauthlib==0.4.4
 google-pasta==0.2.0
 greenlet==1.1.2
-gunicorn==19.3.0
+gunicorn @ git+https://github.com/benoitc/gunicorn.git@0b953b803786997d633d66c0f7c7b290df75e07c
 htmlmin==0.1.12
 idna==2.10
 ImageHash==4.2.1
@@ -94,6 +96,7 @@ plotly==5.10.0
 prometheus-client==0.14.1
 prometheus-flask-exporter==0.20.1
 prompt-toolkit==3.0.30
+protobuf==4.21.6
 psutil==5.9.1
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
