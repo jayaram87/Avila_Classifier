@@ -12,6 +12,7 @@ def demo():
         logging.info(f'Demo training pipeline completed')
     except Exception as e:
         logging.error(f'{str(e)}')
+        # a
 
 if __name__ == '__main__':
     demo()
